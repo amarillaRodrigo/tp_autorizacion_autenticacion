@@ -1,15 +1,15 @@
-import { pool } from "../db/database.js";
+import pool from "../db/database.js";
 
 export const controllers = {
   register: async (req, res) => {
     const { username, password } = req.body || {};
-  
-    // Verificar que los campos no estén vacíos y no sean undefined
+
     if (!username || !password) {
       return res.status(400).json({ message: "Faltan campos requeridos" });
     }
-  
+
     try {
+      // Verificar si el usuario ya existe
       const [rows] = await pool.query(
         "SELECT * FROM users WHERE username = ?",
         [username]
@@ -17,16 +17,16 @@ export const controllers = {
       if (rows.length > 0) {
         return res.status(400).json({ message: "El usuario ya existe" });
       }
-  
+
+      // Crear nuevo usuario
       await pool.query("INSERT INTO users (username, password) VALUES (?, ?)", [
         username,
         password,
       ]);
-  
-      return res.json({ message: "Usuario creado exitosamente" });
+      res.status(201).json({ message: "Usuario creado exitosamente" });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Error del servidor" });
+      res.status(500).json({ message: "Error del servidor" });
     }
   },
 
@@ -42,21 +42,15 @@ export const controllers = {
         "SELECT * FROM users WHERE username = ? AND password = ?",
         [username, password]
       );
+
       if (rows.length === 0) {
         return res.status(401).json({ message: "Credenciales incorrectas" });
       }
 
-      const user = rows[0];
-      req.session.userId = user.id;
-      req.session.username = user.username;
-
-      return res.json({
-        message: "Inicio de sesión exitoso",
-        user: { id: user.id, username: user.username },
-      });
+      res.status(200).json({ message: "Inicio de sesión exitoso" });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Error del servidor" });
+      res.status(500).json({ message: "Error del servidor" });
     }
   },
 

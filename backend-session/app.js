@@ -3,7 +3,7 @@ import express from "express";
 import session from "express-session";
 import morgan from "morgan";
 import path from "path";
-import { authRouter } from "./routes/auth.routes.js";
+import authRouter  from "./routes/auth.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 4000;
 const __dirname = path.resolve();
 
 // Middlewares
+app.use(express.json());
 app.use(
   cors({
     // Permitir solicitudes desde el front-end
@@ -19,13 +20,12 @@ app.use(
     credentials: true, // Habilitar envío de cookies
   })
 );
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 app.use(authRouter);
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   session({
-    secret: "mi_secreto",
+    secret: 'mi_secreto',
     resave: false,
     saveUninitialized: true,
     cookie: {
