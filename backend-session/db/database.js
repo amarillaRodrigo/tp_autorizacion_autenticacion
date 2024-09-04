@@ -1,25 +1,27 @@
-export const database = 
-    {
-        user: [
-            {
-                id: 1,
-                username: 'admin',
-                password: 'admin'
-            },
-            {
-                id: 2,
-                username: 'user',
-                password: 'user'
-            },
-            {
-                id: 3,
-                username: 'guest',
-                password: 'guest'
-            },
-            {
-                id: 4,
-                username: 'guest2',
-                password: 'guest2'
-            }
-        ]
+import mysql from 'mysql2/promise';
+
+// Crear un pool de conexiones
+export const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'db_system',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Probar la conexión
+async function testConnection() {
+    try {
+        const connection = await pool.getConnection();
+        console.log('Conexión a la base de datos exitosa');
+        connection.release();
+    } catch (error) {
+        console.error('Error al conectar a la base de datos:', error);
     }
+}
+
+testConnection();
+
+export default pool;
