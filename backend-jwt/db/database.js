@@ -1,25 +1,14 @@
-export const database = 
-    {
-        user: [
-            {
-                id: 1,
-                username: 'admin',
-                password: 'admin'
-            },
-            {
-                id: 2,
-                username: 'user',
-                password: 'user'
-            },
-            {
-                id: 3,
-                username: 'guest',
-                password: 'guest'
-            },
-            {
-                id: 4,
-                username: 'guest2',
-                password: 'guest2'
-            }
-        ]
-    }
+import mysql2 from 'mysql2/promise';
+
+// Crear un pool de conexiones
+export const pool = mysql2.createPool({
+    host: 'localhost',
+    user: 'root',
+    database: 'db_system',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+
+export default pool;
