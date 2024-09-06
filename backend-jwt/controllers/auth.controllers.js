@@ -1,16 +1,8 @@
-import express from "express";
-import jwt from "jsonwebtoken";
-import { SECRET_KEY } from "../config/env.js";
+import bcrypt from "bcryptjs";
 import pool from "../db/database.js";
-import { generarJWT } from "../helpers/generar-jwt.js";
+import { generarJwt } from "../helpers/generar-jwt.js";
 import { validarJwt } from "../middlewares/validar-jwt.js";
-import bcrypt from "bcrypt"; // Importar bcrypt
-
-const app = express();
-
-app.use(express.json());
-
-export const controllers = {
+export const controller = {
   // Endpoint de registro
   register: async (req, res) => {
     const { username, password } = req.body;
@@ -31,7 +23,7 @@ export const controllers = {
         return res.status(400).json({ message: "El usuario ya existe" });
       }
 
-      // Hashear la contraseña antes de guardarla
+      // Hashear la contraseña
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Crear un nuevo usuario
@@ -47,7 +39,6 @@ export const controllers = {
     }
   },
 
-  // Endpoint de inicio de sesión (login)
   login: async (req, res) => {
     const { username, password } = req.body;
 
@@ -56,28 +47,28 @@ export const controllers = {
     }
 
     try {
-      // Buscar al usuario en la base de datos
       const [rows] = await pool.query(
         "SELECT * FROM users WHERE username = ?",
         [username]
       );
       const user = rows[0];
 
-      if (!user || !(await bcrypt.compare(password, user.password))) {
+      if (!user) {
         return res.status(401).json({ message: "Credenciales incorrectas" });
       }
 
-      // Generar token JWT
-      const token = await generarJWT(user.id);
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Credenciales incorrectas" });
+      }
 
-      // Almacenar el token en la sesión del servidor
+      const token = await generarJwt(user.id);
       req.session.token = token;
 
-      // Almacenar el token en una cookie segura
       res.cookie("authToken", token, {
-        httpOnly: true, // La cookie no es accesible desde JavaScript
-        secure: false, // Cambiar a true en producción con HTTPS
-        maxAge: 3600000, // Expiración en milisegundos (1 hora)
+        httpOnly: true,
+        secure: false,
+        maxAge: 3600000,
       });
 
       return res.json({ message: "Inicio de sesión exitoso" });
@@ -87,7 +78,6 @@ export const controllers = {
     }
   },
 
-  // Endpoint para validar la sesión
   session: [
     validarJwt,
     (req, res) => {
@@ -99,7 +89,6 @@ export const controllers = {
     },
   ],
 
-  // Endpoint de cierre de sesión (logout)
   logout: (req, res) => {
     req.session.destroy((err) => {
       if (err) {
@@ -112,4 +101,4 @@ export const controllers = {
   },
 };
 
-export default controllers;
+export default controller;

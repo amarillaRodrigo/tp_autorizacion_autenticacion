@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../config/env.js";
 
-export const generarJWT = (userId) => {
+export const generarJwt = (userId) => {
   return new Promise((resolve, reject) => {
     const payload = { userId };
     jwt.sign(

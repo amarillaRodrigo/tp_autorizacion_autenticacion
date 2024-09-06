@@ -3,7 +3,7 @@ import { SECRET_KEY } from "../config/env.js";
 import pool from "../db/database.js"; // Asegúrate de que la ruta sea correcta
 
 // Middleware para verificar el token JWT
-const validarJwt = async (req, res, next) => {
+export const validarJwt = async (req, res, next) => {
   console.log(req.session);
   console.log("-----------");
   console.log(req.cookies);
@@ -34,5 +34,4 @@ const validarJwt = async (req, res, next) => {
     return res.status(401).json({ message: "Token inválido" });
   }
 };
-
-export { validarJwt }; // Exportar el middleware como una exportación nombrada
+// Exportar el middleware como una exportación nombrada
